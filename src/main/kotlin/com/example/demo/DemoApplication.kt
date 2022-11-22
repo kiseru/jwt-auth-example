@@ -1,6 +1,7 @@
 package com.example.demo
 
 import com.auth0.jwt.JWT
+import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -73,6 +74,13 @@ class DemoApplication {
                 .build()
         )
     }
+
+    @Bean
+    fun jwtVerifier(algorithm: Algorithm): JWTVerifier = JWT.require(algorithm)
+        .build()
+
+    @Bean
+    fun algorithm(): Algorithm = Algorithm.HMAC256("secret")
 }
 
 fun main(args: Array<String>) {
@@ -141,10 +149,12 @@ class JwtFilter(
 }
 
 @Service
-class TokenService {
+class TokenService(
+    private val algorithm: Algorithm,
+    private val jwtVerifier: JWTVerifier,
+) {
 
     fun generateTokenFor(user: UserDetails): String {
-        val algorithm = Algorithm.HMAC256("secret")
         return JWT.create()
             .withSubject(user.username)
             .withArrayClaim("roles", user.authorities.map { it.authority }.toTypedArray())
@@ -153,10 +163,7 @@ class TokenService {
     }
 
     fun getUsername(token: String): String {
-        val jwtVerifier = JWT.require(Algorithm.HMAC256("secret"))
-            .build()
-        val decodedJWT = jwtVerifier.verify(token)
-        return decodedJWT.subject
+        return jwtVerifier.verify(token).subject
     }
 }
 
