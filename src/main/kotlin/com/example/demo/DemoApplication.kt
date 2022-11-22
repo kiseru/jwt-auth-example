@@ -148,7 +148,7 @@ class TokenService {
         return JWT.create()
             .withSubject(user.username)
             .withArrayClaim("roles", user.authorities.map { it.authority }.toTypedArray())
-            .withExpiresAt(Instant.now().plus(15, ChronoUnit.SECONDS))
+            .withExpiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
             .sign(algorithm)
     }
 
