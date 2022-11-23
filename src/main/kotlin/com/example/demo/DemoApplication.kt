@@ -38,6 +38,11 @@ import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
+private const val BEARER_PREFIX = "Bearer "
+
+private val CARS = listOf("Lada", "Audi", "BMW", "Volkswagen", "Skoda", "Honda")
+    .map { Car(it) }
+
 @SpringBootApplication
 class DemoApplication {
 
@@ -94,11 +99,9 @@ class HomeController(
     private val userDetailsService: UserDetailsService,
 ) {
 
-    private val cars = listOf("Lada", "Audi", "BMW", "Volkswagen", "Skoda", "Honda")
-
     @GetMapping("/cars")
     fun findAllCars(): List<Car> {
-        return cars.map { Car(it) }
+        return CARS
     }
 
     @PostMapping("/sign-in")
@@ -106,7 +109,6 @@ class HomeController(
         val username = signInDto.username
         val user = userDetailsService.loadUserByUsername(username)
             ?: throw UsernameNotFoundException("User with $username not found")
-
 
         if (!passwordEncoder.matches(signInDto.password, user.password)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST)
@@ -125,15 +127,15 @@ class JwtFilter(
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        filterChain: FilterChain
+        filterChain: FilterChain,
     ) {
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)
-        if (authorization == null || authorization.isEmpty() || !authorization.startsWith("Bearer ")) {
+        if (authorization == null || authorization.isEmpty() || !authorization.startsWith(BEARER_PREFIX)) {
             filterChain.doFilter(request, response)
             return
         }
 
-        val token = authorization.substring(7)
+        val token = authorization.substring(BEARER_PREFIX.length)
         val username = tokenService.getUsername(token)
         val user = userDetailsService.loadUserByUsername(username)
         val authentication =
