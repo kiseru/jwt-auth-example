@@ -94,16 +94,11 @@ class HomeController(
     private val userDetailsService: UserDetailsService,
 ) {
 
+    private val cars = listOf("Lada", "Audi", "BMW", "Volkswagen", "Skoda", "Honda")
+
     @GetMapping("/cars")
     fun findAllCars(): List<Car> {
-        return listOf(
-            Car("Lada"),
-            Car("Audi"),
-            Car("BMW"),
-            Car("Volkswagen"),
-            Car("Skoda"),
-            Car("Honda"),
-        )
+        return cars.map { Car(it) }
     }
 
     @PostMapping("/sign-in")
