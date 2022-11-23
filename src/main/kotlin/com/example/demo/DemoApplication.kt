@@ -165,13 +165,15 @@ class TokenService(
     }
 }
 
-class Car(val name: String)
+data class Car(
+    val name: String,
+)
 
-class SignInDto(
+data class SignInDto(
     val username: String,
     val password: String,
 )
 
-class TokenDto(
+data class TokenDto(
     val token: String,
 )
