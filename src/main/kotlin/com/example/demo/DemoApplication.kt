@@ -133,12 +133,13 @@ class JwtFilter(
         filterChain: FilterChain
     ) {
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)
-        if (authorization == null || authorization.isEmpty()) {
+        if (authorization == null || authorization.isEmpty() || !authorization.startsWith("Bearer ")) {
             filterChain.doFilter(request, response)
             return
         }
 
-        val username = tokenService.getUsername(authorization)
+        val token = authorization.substring(7)
+        val username = tokenService.getUsername(token)
         val user = userDetailsService.loadUserByUsername(username)
         val authentication =
             UsernamePasswordAuthenticationToken(user, null, user?.authorities ?: listOf())
